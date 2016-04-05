@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  GroupViewController.h
 //  MyNotes
 //
 //  Created by Jeremy Ong on 05/04/2016.
@@ -7,9 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "RootViewController.h"
 
-@interface ViewController : UIViewController
-
-
+@interface GroupViewController : UIViewController
+@property NSMutableArray *notes;
 @end
-
