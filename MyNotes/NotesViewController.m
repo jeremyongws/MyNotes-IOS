@@ -6,26 +6,44 @@
 //  Copyright © 2016 Jeremy Ong. All rights reserved.
 //
 
-#import "RootViewController.h"
+#import "NotesViewController.h"
 #import "ContentViewController.h"
 #import "GroupViewController.h"
 
-@interface RootViewController () <UITableViewDelegate, UITableViewDataSource>
+@interface NotesViewController () <UITableViewDelegate, UITableViewDataSource>
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
-@property NSMutableArray *notes;
+@property AVAudioPlayer *audioPlayer;
+
 @end
 
-@implementation RootViewController
+@implementation NotesViewController
 
 - (void)viewDidLoad {
+	NSString *path = [NSString stringWithFormat:@"%@/wind.mp3", [[NSBundle mainBundle] resourcePath]];
+	NSURL *soundUrl = [NSURL fileURLWithPath:path];
+	
+	// Create audio player object and initialize with URL to sound
+	self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundUrl error:nil];
 	self.tableView.delegate = self;
 	self.tableView.dataSource = self;
-	Note *noteOne = [Note initWithTitle:@"I am title One" andContent:@"lulz"];
-	Note *noteTwo = [Note initWithTitle:@"I am title Two" andContent:@"lulz2"];
-	Note *noteThree = [Note initWithTitle:@"I am title Three" andContent:@"lulz312309128418748109380918309128490128903012983019283091283098120938019"];
-	self.notes = [[NSMutableArray alloc] initWithObjects:noteOne, noteTwo, noteThree, nil];
+	UISwipeGestureRecognizer *gestureRecognizerRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(onSwipeRight:)];
+	[gestureRecognizerRight setDirection:UISwipeGestureRecognizerDirectionRight];
+	UISwipeGestureRecognizer *gestureRecognizerLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(onSwipeLeft:)];
+	[gestureRecognizerLeft setDirection:UISwipeGestureRecognizerDirectionLeft];
+	[[self view] addGestureRecognizer:gestureRecognizerLeft];
+	[[self view] addGestureRecognizer:gestureRecognizerRight];
+
+	
 	[super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+}
+
+- (IBAction)onSwipeRight:(id)sender {
+	[[self audioPlayer] play];
+}
+
+- (IBAction)onSwipeLeft:(id)sender {
+	[[self audioPlayer] play];
 }
 
 - (IBAction)onEditButtonPressed:(id)sender {
@@ -49,15 +67,16 @@
 }
 
 
-- (void)viewDidAppear:(BOOL)animated{
-	[self.tableView reloadData];
-}
+//- (void)viewDidAppear:(BOOL)animated{
+//	[self.tableView reloadData];
+//}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
 	NSString *title = [[self.notes objectAtIndex:[indexPath row]] title];
 	NSString *content = [[self.notes objectAtIndex:[indexPath row]] content];
 	cell.textLabel.text = title;
+	cell.imageView.image = [UIImage imageNamed:@"logo"];
 	if ([content length] < 15){
 		cell.detailTextLabel.text = content;
 	} else {
@@ -74,7 +93,6 @@
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
 	ContentViewController *destination = segue.destinationViewController;
-	GroupViewController *groupDestination = segue.destinationViewController;
 	if ([[segue identifier] isEqualToString:@"AddNoteSegue"]){
 		destination.note = [Note new];
 		destination.note.title = @"";
@@ -84,11 +102,8 @@
 	} else if ([[segue identifier] isEqualToString:@"ShowNoteSegue"]) {
 		destination.note = [self.notes objectAtIndex:[[self.tableView indexPathForSelectedRow] row]];
 		destination.editing = YES;
-	} else if ([[segue identifier] isEqualToString:@"AddToGroup"]){
-		groupDestination.notes = self.notes;
 	}
 }
-
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
 	UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
@@ -98,5 +113,26 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
 	return [self.notes count];
 }
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+	UIAlertController *deleteController = [UIAlertController alertControllerWithTitle:@"Are you sure" message:@"you want to delete this?" preferredStyle:UIAlertControllerStyleAlert];
+	
+	UIAlertAction *deleteAction = [UIAlertAction actionWithTitle:@"DELETE" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action){
+		[self.notes removeObjectAtIndex:[indexPath row]];
+		[self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationLeft];
+		[[self audioPlayer] play];
+		
+	}];;
+	
+	UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"CANCEL" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action){
+		[self.tableView setEditing:NO];
+	}];;
+	
+	[deleteController addAction:deleteAction];
+	[deleteController addAction:cancelAction];
+	[self presentViewController:deleteController animated:YES completion:nil];
+	
+}
+
 
 @end

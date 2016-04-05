@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "Note.h"
 
+
 @interface ContentViewController : UIViewController
 
 @property Note *note;

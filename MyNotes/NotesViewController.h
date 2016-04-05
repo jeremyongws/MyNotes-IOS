@@ -8,10 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import "Note.h"
+#import <AVFoundation/AVFoundation.h>
+#import <AudioToolbox/AudioToolbox.h>
 
-@interface RootViewController : UIViewController
+@interface NotesViewController : UIViewController
 
 @property Note *note;
+@property NSMutableArray *notes;
+
 
 @end
 

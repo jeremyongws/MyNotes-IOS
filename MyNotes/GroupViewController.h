@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "RootViewController.h"
+#import "NotesViewController.h"
+#import "Group.h"
 
 @interface GroupViewController : UIViewController
-@property NSMutableArray *notes;
+@property NSMutableArray *groups;
 @end

@@ -11,6 +11,6 @@
 @interface Group : NSObject
 
 @property NSString *title;
-@property NSMutableArray *group;
+@property NSMutableArray *notes;
 
 @end
